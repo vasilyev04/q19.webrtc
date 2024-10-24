@@ -352,7 +352,12 @@ class PeerConnectionClient constructor(
 
         var isStreamAdded = false
         if (localMediaStream != null) {
-            isStreamAdded = peerConnection?.addStream(localMediaStream) == true
+
+            val audioTrackSender = peerConnection?.addTrack(audioTrack, listOf(localMediaStream?.id))
+            val videoTrackSender = peerConnection?.addTrack(videoTrack, listOf(localMediaStream?.id))
+
+            isStreamAdded = (audioTrackSender != null && videoTrackSender != null)
+
         }
 
         startAudioManager()
