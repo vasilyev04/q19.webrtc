@@ -103,11 +103,15 @@ subprojects { project ->
 
                 pom {
                     name = project.name
-                    url = "https://github.com/vasilyev04/q19.webrtc"
+                    url = "https://github.com/zhombie/q19.webrtc"
 
                     developers {
                         developer {
-                            name = 'vasilyev04'
+                            name = 'zhombie'
+                        }
+
+                        developer {
+                            name = "vasilyev04"
                         }
                     }
                 }
@@ -121,13 +125,10 @@ subprojects { project ->
                         dependencyNode.appendNode('version', dependency.version)
                     }
                 }
-
-                afterEvaluate {
-                    artifact "$buildDir/outputs/aar/$project.name-release.aar"
-                }
             }
         }
     }
+
 }
 
 
