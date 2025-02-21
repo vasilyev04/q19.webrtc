@@ -4,6 +4,7 @@ android {
     defaultConfig {
         consumerProguardFiles 'consumer-rules.pro'
     }
+    namespace = "kz.q19.webrtc"
 }
 
 dependencies {

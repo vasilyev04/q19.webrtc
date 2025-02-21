@@ -3,6 +3,7 @@ package kz.q19.sample.webrtc
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import kz.q19.sample.R
 
 class MainActivity : AppCompatActivity() {
 

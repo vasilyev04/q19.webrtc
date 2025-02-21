@@ -153,8 +153,10 @@ class PeerConnectionClient constructor(
                 val builder = when {
                     it.url.isNotBlank() ->
                         PeerConnection.IceServer.builder(it.url)
+
                     it.urls.isNotBlank() ->
                         PeerConnection.IceServer.builder(it.urls)
+
                     else ->
                         throw IllegalStateException("url || urls is null or blank. Please provide anything.")
                 }
@@ -334,7 +336,7 @@ class PeerConnectionClient constructor(
         }
     }
 
-    fun addLocalStreamToPeer(): Boolean {
+    fun addLocalStreamToPeer(enableVideoTrack: Boolean = true): Boolean {
         Logger.debug(TAG, "addLocalStreamToPeer()")
 
         localMediaStream = peerConnectionFactory?.createLocalMediaStream("ARDAMS")
@@ -353,11 +355,17 @@ class PeerConnectionClient constructor(
         var isStreamAdded = false
         if (localMediaStream != null) {
 
-            val audioTrackSender = peerConnection?.addTrack(audioTrack, listOf(localMediaStream?.id))
-            val videoTrackSender = peerConnection?.addTrack(videoTrack, listOf(localMediaStream?.id))
+            val audioTrackSender =
+                peerConnection?.addTrack(audioTrack, listOf(localMediaStream?.id))
 
-            isStreamAdded = (audioTrackSender != null && videoTrackSender != null)
+            isStreamAdded = if (enableVideoTrack) {
+                val videoTrackSender =
+                    peerConnection?.addTrack(videoTrack, listOf(localMediaStream?.id))
 
+                audioTrackSender != null && videoTrackSender != null
+            } else {
+                audioTrackSender != null
+            }
         }
 
         startAudioManager()
@@ -432,11 +440,20 @@ class PeerConnectionClient constructor(
             return null
         }
 
-        localVideoCapturer?.initialize(surfaceTextureHelper, context, localVideoSource?.capturerObserver)
+        localVideoCapturer?.initialize(
+            surfaceTextureHelper,
+            context,
+            localVideoSource?.capturerObserver
+        )
 
-        localVideoCapturer?.startCapture(options.localVideoWidth, options.localVideoHeight, options.localVideoFPS)
+        localVideoCapturer?.startCapture(
+            options.localVideoWidth,
+            options.localVideoHeight,
+            options.localVideoFPS
+        )
 
-        localVideoTrack = peerConnectionFactory?.createVideoTrack(options.localVideoTrackId, localVideoSource)
+        localVideoTrack =
+            peerConnectionFactory?.createVideoTrack(options.localVideoTrackId, localVideoSource)
         localVideoTrack?.setEnabled(options.isLocalVideoEnabled)
 
         localVideoSink = ProxyVideoSink("LocalVideoSink")
@@ -453,7 +470,8 @@ class PeerConnectionClient constructor(
 
         localAudioSource = peerConnectionFactory?.createAudioSource(getAudioMediaConstraints())
 
-        localAudioTrack = peerConnectionFactory?.createAudioTrack(options.localAudioTrackId, localAudioSource)
+        localAudioTrack =
+            peerConnectionFactory?.createAudioTrack(options.localAudioTrackId, localAudioSource)
         localAudioTrack?.setEnabled(options.isLocalAudioEnabled)
 
         return localAudioTrack
@@ -587,7 +605,8 @@ class PeerConnectionClient constructor(
         rtcConfig.tcpCandidatePolicy = PeerConnection.TcpCandidatePolicy.DISABLED
         rtcConfig.bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE
         rtcConfig.rtcpMuxPolicy = PeerConnection.RtcpMuxPolicy.REQUIRE
-        rtcConfig.continualGatheringPolicy = PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY
+        rtcConfig.continualGatheringPolicy =
+            PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY
         rtcConfig.iceTransportsType = PeerConnection.IceTransportsType.ALL
 
         val peerConnectionObserver = object : PeerConnection.Observer {
@@ -731,9 +750,11 @@ class PeerConnectionClient constructor(
             mediaStreamTrack.kind() == MediaStreamTrack.AUDIO_TRACK_KIND -> {
                 remoteMediaStream?.removeTrack(remoteAudioTrack) == true
             }
+
             mediaStreamTrack.kind() == MediaStreamTrack.VIDEO_TRACK_KIND -> {
                 remoteMediaStream?.removeTrack(remoteVideoTrack) == true
             }
+
             else -> {
                 false
             }
@@ -806,7 +827,11 @@ class PeerConnectionClient constructor(
         isZOrderMediaOverlay: Boolean = true
     ): Boolean {
         localSurfaceViewRenderer = surfaceViewRenderer
-        return if (initLocalCameraStream(isMirrored = isMirrored, isZOrderMediaOverlay = isZOrderMediaOverlay)) {
+        return if (initLocalCameraStream(
+                isMirrored = isMirrored,
+                isZOrderMediaOverlay = isZOrderMediaOverlay
+            )
+        ) {
             localVideoSink?.setTarget(localSurfaceViewRenderer) == true
         } else {
             false
@@ -819,7 +844,11 @@ class PeerConnectionClient constructor(
         isZOrderMediaOverlay: Boolean = true
     ): Boolean {
         remoteSurfaceViewRenderer = surfaceViewRenderer
-        return if (initRemoteCameraStream(isMirrored = isMirrored, isZOrderMediaOverlay = isZOrderMediaOverlay)) {
+        return if (initRemoteCameraStream(
+                isMirrored = isMirrored,
+                isZOrderMediaOverlay = isZOrderMediaOverlay
+            )
+        ) {
             remoteVideoSink?.setTarget(remoteSurfaceViewRenderer) == true
         } else {
             false
@@ -1165,9 +1194,10 @@ class PeerConnectionClient constructor(
         addConstraints(offerAnswerConstraints)
     }
 
-    private fun getOfferAnswerRestartConstraints(): MediaConstraints = getOfferAnswerConstraints().apply {
-        mandatory.add(OfferAnswerConstraints.ICE_RESTART.toKeyValuePair(true))
-    }
+    private fun getOfferAnswerRestartConstraints(): MediaConstraints =
+        getOfferAnswerConstraints().apply {
+            mandatory.add(OfferAnswerConstraints.ICE_RESTART.toKeyValuePair(true))
+        }
 
     private fun MediaConstraints.addConstraints(constraints: RTCConstraints<*, *>): Boolean {
         return mandatory.addAll(constraints.mandatoryKeyValuePairs) && optional.addAll(constraints.optionalKeyValuePairs)

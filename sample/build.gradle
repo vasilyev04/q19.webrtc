@@ -7,14 +7,14 @@ plugins {
 apply from: '../system/dependencies.gradle'
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion '31.0.0'
+    compileSdkVersion 34
+    namespace = "kz.q19.sample"
 
     defaultConfig {
         applicationId 'kz.q19.webrtc'
 
         minSdkVersion 23
-        targetSdkVersion 31
+        targetSdkVersion 34
 
         versionCode project.ext.version_code
         versionName project.version
@@ -29,12 +29,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 }
 
